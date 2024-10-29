@@ -1,0 +1,50 @@
+//@version=5
+indicator('EMA Touches with Crossover Signals', overlay=true)
+
+// Input parameters
+bars = input(20, title='Minimum Bars between alerts')
+source = input.source(close)
+
+// Calculate EMAs
+ema12 = ta.ema(source, 12)
+ema26 = ta.ema(source, 26)
+ema50 = ta.ema(source, 50)
+
+// Define a threshold for "touching" the EMA
+threshold = input(0.01, title='Touch Threshold (%)') / 100
+
+// Check if the price is within the threshold of the EMA 12
+touchEMA12 = math.abs(close - ema12) <= (ema12 * threshold)
+
+// Alert conditions based on touching EMA 12
+alertCondition = touchEMA12 and ta.change(time("D")) // Reset daily
+
+// Bar pass counter
+var int barPass = 0
+barPass := nz(barPass[1]) + 1
+
+// Check if alert conditions are met
+alert = alertCondition and barPass >= bars
+if alert
+    barPass := 0
+
+// Plotting the EMAs
+plot(ema12, color=color.new(color.blue, 0), title="EMA 12")
+plot(ema26, color=color.new(color.orange, 0), title="EMA 26")
+plot(ema50, color=color.new(color.purple, 0), title="EMA 50")
+
+// Detect crossover and crossunder signals
+crossoverSignal = ta.crossover(ema12, ema26)
+crossunderSignal = ta.crossunder(ema12, ema26)
+
+// Plot cross signs for crossover and crossunder events
+plotshape(crossoverSignal, style=shape.labeldown, color=color.green, size=size.small, title="Crossover Signal",location = location.abovebar)
+plotshape(crossunderSignal, style=shape.labelup, color=color.red, size=size.small, title="Crossunder Signal",location = location.belowbar)
+
+// Plot a cross sign when the price touches the EMA 12
+plotshape(touchEMA12, style=shape.xcross, color=color.yellow, size=size.small, title="Touch Signal on EMA 12")
+
+// Background color for alerts
+bgcolor(alert ? (touchEMA12 ? color.new(color.green, 40) : na) : na, title="Signal")
+
+// Alert conditions for touching EMA
