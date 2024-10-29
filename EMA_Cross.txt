@@ -1,5 +1,5 @@
 //@version=5
-indicator(title="GDAX EMA Cross with 50 EMA", shorttitle="GDAX EMA", overlay=true)
+indicator(title="GDAX EMA Cross Signals", shorttitle="GDAX EMA", overlay=true)
 
 // Calculate EMAs
 short = ta.ema(close, 12) // 12-period EMA
@@ -7,29 +7,21 @@ medium = ta.ema(close, 26) // 26-period EMA
 long = ta.ema(close, 50) // 50-period EMA
 
 // Plot EMAs
-plot(short, color=color.new(#6f92ce, 0), linewidth=5, title="Ema 12")
-plot(medium, color=color.new(#e08937, 0), linewidth=5, title="Ema 26")
-plot(long, color=color.new(color.purple, 0), linewidth=5, title="Ema 50")
+plot(short, color=color.new(#6f92ce, 0), linewidth=5, title="Ema 12", editable=true)
+plot(long, color=color.new(#e08937, 0), linewidth=5, title="Ema 26", editable=true)
+plot(medium, color=color.new(color.purple, 0), linewidth=5, title="Ema 50", editable=true)
 
 // Define crossover conditions
-crossoverSignal26 = ta.crossover(short, medium) // Crossover with 26 EMA
-crossunderSignal26 = ta.crossunder(short, medium) // Crossunder with 26 EMA
-
-crossoverSignal50 = ta.crossover(short, long) // Crossover with 50 EMA
-crossunderSignal50 = ta.crossunder(short, long) // Crossunder with 50 EMA
+crossoverSignal = ta.crossover(short, long)
+crossunderSignal = ta.crossunder(short, long)
 
 // Plot cross signals for EMA crossover
-plotshape(crossoverSignal26, style=shape.labeldown, color=color.green, size=size.small, title="Crossover Signal (EMA 26)", location=location.abovebar)
-plotshape(crossunderSignal26, style=shape.labelup, color=color.red, size=size.small, title="Crossunder Signal (EMA 26)", location=location.belowbar)
+plotshape(crossoverSignal, style=shape.xcross, color=color.green, size=size.small, title="Crossover Signal")
+plotshape(crossunderSignal, style=shape.xcross, color=color.red, size=size.small, title="Crossunder Signal")
 
-plotshape(crossoverSignal50, style=shape.labeldown, color=color.blue, size=size.small, title="Crossover Signal (EMA 50)", location=location.abovebar)
-plotshape(crossunderSignal50, style=shape.labelup, color=color.orange, size=size.small, title="Crossunder Signal (EMA 50)", location=location.belowbar)
-
-// Alert conditions for EMA crossover
-alertcondition(crossoverSignal26, title="EMA 26 Crossover Alert", message="EMA 12 has crossed above EMA 26 - Buy Signal!")
-alertcondition(crossunderSignal26, title="EMA 26 Crossunder Alert", message="EMA 12 has crossed below EMA 26 - Sell Signal!")
-alertcondition(crossoverSignal50, title="EMA 50 Crossover Alert", message="EMA 12 has crossed above EMA 50 - Buy Signal!")
-alertcondition(crossunderSignal50, title="EMA 50 Crossunder Alert", message="EMA 12 has crossed below EMA 50 - Sell Signal!")
+// Alert conditions for entry signals
+alertcondition(crossoverSignal, title="EMA Crossover Alert", message="EMA 12 has crossed above EMA 26 - Buy Signal!")
+alertcondition(crossunderSignal, title="EMA Crossunder Alert", message="EMA 12 has crossed below EMA 26 - Sell Signal!")
 
 // Color bars based on trend conditions
-barcolor(crossoverSignal26 ? color.green : crossunderSignal26 ? color.red : crossoverSignal50 ? color.blue : crossunderSignal50 ? color.orange : na)
+barcolor(crossoverSignal ? color.green : crossunderSignal ? color.red : na, title="Highlights Trend")
