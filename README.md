@@ -12,7 +12,4 @@ Scenario
 2. pullback not touch ma12
 3. break ma50 and still close above ma50
    
-Before 
-![Screenshot 2024-10-29 151731](https://github.com/user-attachments/assets/c942b1ba-3099-4684-80ee-9e59981ac264)
-
-After
+![Screenshot 2024-10-30 150107](https://github.com/user-attachments/assets/0cb640e7-2a28-4df3-ad0b-1007100e4363)
