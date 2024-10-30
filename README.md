@@ -3,9 +3,11 @@
 
 Example like below. We will go to the moon .
 
-1. ride the trend
-2. cross sign  50
-3. above ema 12 & cannot break ema12
+1. it check cross ma50
+2. it check pullback
+3. it check touch ma12
+4. time to entry.
+5. hold until it not close below ma50
 
 Scenario
 1. pullback touch ma12
