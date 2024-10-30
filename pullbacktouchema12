@@ -1,0 +1,68 @@
+//@version=5
+indicator('EMA Touches with Trend Detection', overlay=true)
+
+// Input parameters
+bars = input(20, title='Minimum Bars between alerts')
+source = input.source(close)
+
+// Calculate EMAs
+ema12 = ta.ema(source, 12)
+ema26 = ta.ema(source, 26)  // Added EMA26
+
+ema50 = ta.ema(source, 50)
+
+// Define a threshold for "touching" the EMAs
+threshold = input(0.01, title='Touch Threshold (%)') / 100
+
+// Check conditions for each touch scenario
+touchEMA12 = (high >= ema12 * (1 - threshold) and low <= ema12 * (1 + threshold))
+touchEMA26 = (high >= ema26 * (1 - threshold) and low <= ema26 * (1 + threshold))  // Touch condition for EMA26
+touchEMA50 = (high >= ema50 * (1 - threshold) and low <= ema50 * (1 + threshold))
+
+// Detect crossover and crossunder signals
+crossoverSignal = ta.crossover(ema12, ema50)
+crossunderSignal = ta.crossunder(ema12, ema50)
+
+// Identify bearish candle during pullback
+bearishCandle = close < open
+
+// Track if the previous candle was bearish
+var bool lastBearishCandle = false
+
+// Conditions for first bearish pullback without touching EMA12
+firstBearishPullbackNoTouchEMA12 = bearishCandle and not touchEMA12 and not lastBearishCandle
+firstBearishPullbackTouchEMA12 = bearishCandle and  touchEMA12 and not lastBearishCandle
+
+// Update lastBearishCandle status
+lastBearishCandle := bearishCandle
+
+// Trend detection using SMA
+trendLength = input(14, title="Trend Length")
+smaTrend = ta.sma(close, trendLength)
+isUptrend = close > smaTrend and not touchEMA26 and not touchEMA50  // Added conditions to check not touching EMA26 and EMA50 for uptrend
+isDowntrend = close < smaTrend and not touchEMA26 and not touchEMA50  // Added conditions for downtrend
+
+// Plot EMAs
+plot(ema12, color=color.blue, title="EMA 12", linewidth=2)
+plot(ema26, color=color.purple, title="EMA 26", linewidth=2)  // Plotting EMA26
+plot(ema26, color=color.orange, title="EMA 26", linewidth=2)
+plot(ema50, color=color.red, title="EMA 50", linewidth=2)
+
+// Plot cross signs for crossover and crossunder events only in trending markets
+plotshape(crossoverSignal and isUptrend, style=shape.labeldown, color=color.green, size=size.small,
+          title="Crossover Signal", location=location.abovebar)
+plotshape(crossunderSignal and isDowntrend, style=shape.labelup, color=color.red, size=size.small,
+          title="Crossunder Signal", location=location.belowbar)
+
+// Combined plot for touching EMAs in trending markets or first bearish pullback without touching EMA12
+combinedTouchCondition = (touchEMA12 and not touchEMA26 and not touchEMA50 and isUptrend) or (touchEMA12 and not touchEMA26 and not touchEMA50 and isDowntrend)
+
+//combinedPullbackCondition = combinedTouchCondition or (firstBearishPullbackNoTouchEMA12 and isDowntrend) or (firstBearishPullbackNoTouchEMA12 and isUptrend)
+combinedPullbackCondition = combinedTouchCondition or (firstBearishPullbackTouchEMA12 and isDowntrend) or (firstBearishPullbackTouchEMA12 and isUptrend)
+
+plotshape(combinedPullbackCondition, style=shape.xcross, color=color.yellow,
+          size=size.small, title="Touch EMA or First Bearish Pullback No Touch EMA 12", location=location.belowbar)
+
+// Alert conditions for touching EMA and first bearish pullbacks
+alertcondition(touchEMA12 and isUptrend, title='Touch EMA 12 Alert', message="Price touched EMA 12 in uptrend!")
+alertcondition(firstBearishPullbackNoTouchEMA12 and isDowntrend, title='First Bearish Pullback Alert', message="First bearish candle during pullback without touching EMA 12 in downtrend!")
