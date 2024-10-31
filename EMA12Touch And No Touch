@@ -1,5 +1,5 @@
 //@version=5
-indicator('EMA Touches with Trend Detection', overlay=true)
+indicator('EMA Touches with Trend Detection v2', overlay=true)
 
 // Input parameters
 bars = input(20, title='Minimum Bars between alerts')
@@ -59,6 +59,9 @@ var bool firstOccurrenceTriggered = false
 combinedTouchCondition = (touchEMA12 and not touchEMA26 and not touchEMA50 and isUptrend) or 
                          (touchEMA12 and not touchEMA26 and not touchEMA50 and isDowntrend)
 
+combinedTouchNoCondition = (not touchEMA12 and not touchEMA26 and not touchEMA50 and isUptrend) or 
+                         (not touchEMA12 and not touchEMA26 and not touchEMA50 and isDowntrend)                        
+
 combinedPullbackCondition = firstBearishPullbackTouchEMA12 and (isDowntrend or isUptrend)
 combinedPullbackNoCondition = firstBearishPullbackNoTouchEMA12 and (isDowntrend or isUptrend)
 
@@ -67,10 +70,10 @@ if combinedPullbackCondition and not firstOccurrenceTriggered
     firstOccurrenceTriggered := true
 
 // Plot combined pullback condition only if it's the first occurrence
-plotshape( combinedPullbackNoCondition, style=shape.xcross, color=color.yellow,
+plotshape( combinedPullbackNoCondition and combinedTouchNoCondition , style=shape.xcross, color=color.yellow,
           size=size.small, title="First Bearish Pullback No Touch EMA 12", location=location.belowbar)
 
-plotshape( combinedPullbackCondition, style=shape.xcross, color=color.orange,
+plotshape( combinedPullbackCondition and combinedTouchCondition, style=shape.xcross, color=color.orange,
           size=size.small, title="First Bearish Pullback Touch EMA 12", location=location.belowbar)
 
 
