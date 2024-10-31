@@ -71,7 +71,7 @@ plotshape( combinedPullbackNoCondition, style=shape.xcross, color=color.yellow,
           size=size.small, title="First Bearish Pullback No Touch EMA 12", location=location.belowbar)
 
 plotshape( combinedPullbackCondition, style=shape.xcross, color=color.orange,
-          size=size.small, title="First Bearish Pullback No Touch EMA 12", location=location.belowbar)
+          size=size.small, title="First Bearish Pullback Touch EMA 12", location=location.belowbar)
 
 
 
