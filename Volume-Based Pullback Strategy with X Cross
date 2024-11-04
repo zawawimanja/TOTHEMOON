@@ -1,4 +1,3 @@
-
 //@version=5
 strategy("Volume MA Pullback Strategy", overlay=true)
 
@@ -23,15 +22,18 @@ isBullishCandle = close > open
 twoRedBarsHighVol = isBearishCandle and isBearishCandle[1] and isVolHigh and isVolHigh[1]
 
 // Detect one bearish bar followed by one bullish bar with high volume
-bullishReversal = isBearishCandle[1] and isBullishCandle and isVolHigh[1] and isVolHigh
+bullishReversal = isBearishCandle[1] and isBullishCandle 
+
+
+// Detect one bearish bar followed by one bullish bar with high volume
+// bullishReversal = isBullishCandle[1] and isBearishCandle and is
 
 // Pullback conditions
 isPriceAboveMA50 = close > ma50
 isMA12aboveMA26 = ma12 > ma26
 isPullback = ta.crossover(close, ma12) and isPriceAboveMA50 and isMA12aboveMA26
 
-// Entry conditions
-longCondition = isPullback and bullishReversal and not twoRedBarsHighVol
+
 
 // Plot moving averages
 plot(ma12, "MA12", color=color.blue)
@@ -39,44 +41,8 @@ plot(ma26, "MA26", color=color.yellow)
 plot(ma50, "MA50", color=color.red)
 
 // Plot signals
-plotshape(
-    series=bullishReversal and isPullback,  
-    title="Bullish Reversal", 
-    style=shape.xcross,
-    location=location.belowbar, 
-    color=color.green, 
-    size=size.normal
-)
+plotshape( series=bullishReversal and isPullback,  title="Bullish Reversal",  style=shape.xcross, location=location.belowbar, color=color.green,  size=size.small)
 
-plotshape(
-    series=twoRedBarsHighVol,  
-    title="Two Red Bars Warning", 
-    style=shape.xcross,
-    location=location.belowbar, 
-    color=color.red, 
-    size=size.normal
-)
+plotshape( series=twoRedBarsHighVol,   title="Two Red Bars Warning",  style=shape.xcross, location=location.belowbar,  color=color.red,  size=size.small)
 
-plotchar(longCondition, "Long Signal", "▲", location.belowbar, color.green, size=size.small)
 
-// Strategy entry
-if (longCondition)
-    strategy.entry("Long", strategy.long)
-
-// Exit when price closes below MA26
-if (close < ma26)
-    strategy.close("Long")
-```
-
-Key changes:
-1. Kept the original `twoRedBarsHighVol` condition
-2. Added the new `bullishReversal` condition
-3. Now plotting both patterns:
-   - Red X for two consecutive bearish bars with high volume
-   - Green X for bearish-to-bullish reversal during pullback
-4. Entry condition requires:
-   - Pullback condition
-   - Bullish reversal pattern
-   - No two red bars warning
-
-Let me know if you'd like any adjustments to either pattern or the visualizations!
