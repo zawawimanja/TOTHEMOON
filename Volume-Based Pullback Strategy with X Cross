@@ -1,6 +1,4 @@
-I'll add both conditions to help identify both patterns.
 
-```pine
 //@version=5
 strategy("Volume MA Pullback Strategy", overlay=true)
 
