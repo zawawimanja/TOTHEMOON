@@ -1,0 +1,51 @@
+//@version=5
+strategy("Volume MA Pullback Strategy", overlay=true)
+
+// Input parameters
+len1 = input(12, "MA1 Length")
+len2 = input(26, "MA2 Length")
+len3 = input(50, "MA3 Length")
+volSmoothLen = input(2, "Volume Smoothing Length")
+
+// Calculate MAs
+ma12 = ta.sma(close, len1)
+ma26 = ta.sma(close, len2)
+ma50 = ta.sma(close, len3)
+
+// Volume analysis
+volSMA = ta.sma(volume, volSmoothLen)
+isVolHigh = volume > volSMA
+isBearishCandle = close < open
+isBullishCandle = close > open
+
+// Detect two consecutive bearish bars with high volume
+twoRedBarsHighVol = isBearishCandle and isBearishCandle[1] and 
+                    isVolHigh and isVolHigh[1]
+
+// Pullback conditions
+isPriceAboveMA50 = close > ma50
+isMA12aboveMA26 = ma12 > ma26
+isPullback = ta.crossover(close, ma12) and isPriceAboveMA50 and isMA12aboveMA26
+
+// Entry conditions
+longCondition = isPullback and 
+                not twoRedBarsHighVol and 
+                isBullishCandle and 
+                isVolHigh
+
+// Plot moving averages
+plot(ma12, "MA12", color=color.blue)
+plot(ma26, "MA26", color=color.yellow)
+plot(ma50, "MA50", color=color.red)
+
+// Plot signals
+plotchar(twoRedBarsHighVol, "Warning - Two Red Bars", "X", location.belowbar, color.red, size=size.normal)
+plotchar(longCondition, "Long Signal", "▲", location.belowbar, color.green, size=size.small)
+
+// Strategy entry
+if (longCondition)
+    strategy.entry("Long", strategy.long)
+
+// Exit when price closes below MA26
+if (close < ma26)
+    strategy.close("Long")
