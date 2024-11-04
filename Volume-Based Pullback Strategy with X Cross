@@ -19,8 +19,7 @@ isBearishCandle = close < open
 isBullishCandle = close > open
 
 // Detect two consecutive bearish bars with high volume
-twoRedBarsHighVol = isBearishCandle and isBearishCandle[1] and 
-                    isVolHigh and isVolHigh[1]
+twoRedBarsHighVol = isBearishCandle and isBearishCandle[1] and  isVolHigh and isVolHigh[1]
 
 // Pullback conditions
 isPriceAboveMA50 = close > ma50
@@ -28,10 +27,7 @@ isMA12aboveMA26 = ma12 > ma26
 isPullback = ta.crossover(close, ma12) and isPriceAboveMA50 and isMA12aboveMA26
 
 // Entry conditions
-longCondition = isPullback and 
-                not twoRedBarsHighVol and 
-                isBullishCandle and 
-                isVolHigh
+longCondition = isPullback and  not twoRedBarsHighVol and isBullishCandle and  isVolHigh
 
 // Plot moving averages
 plot(ma12, "MA12", color=color.blue)
@@ -39,7 +35,7 @@ plot(ma26, "MA26", color=color.yellow)
 plot(ma50, "MA50", color=color.red)
 
 // Plot signals
-plotchar(twoRedBarsHighVol, "Warning - Two Red Bars", "X", location.belowbar, color.red, size=size.normal)
+plotchar(twoRedBarsHighVol, "Warning - Two Red Bars", "X", location.belowbar, color.red, size=size.small)
 plotchar(longCondition, "Long Signal", "▲", location.belowbar, color.green, size=size.small)
 
 // Strategy entry
