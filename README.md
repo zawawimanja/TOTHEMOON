@@ -1,4 +1,4 @@
-
+FOLLOW MAJOR TREND. IF MAJOR TREND JUST ENTRY BUY BECAUSE SELL IS JUST TEMPORARY. ANY TIMES CAN TO THE MOON.
 
 
 Example like below. We will go to the moon .
@@ -10,8 +10,11 @@ Example like below. We will go to the moon .
 5. hold until it not close below ma50
 
 Scenario
-1. pullback touch ma12
-2. pullback not touch ma12
+1. pullback touch ma12 - 
+2. pullback not touch ma12 - wait to retest multiple times
 3. break ma50 and still close above ma50
+
+   Steps to entry
+   wait the cs become bull and then entry.
    
 ![Screenshot 2024-10-30 150107](https://github.com/user-attachments/assets/0cb640e7-2a28-4df3-ad0b-1007100e4363)
