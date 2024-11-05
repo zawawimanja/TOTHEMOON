@@ -16,5 +16,6 @@ Scenario
 
    Steps to entry
    wait the cs become bull and then entry.
+   Dont hold and close when go up.
    
 ![Screenshot 2024-10-30 150107](https://github.com/user-attachments/assets/0cb640e7-2a28-4df3-ad0b-1007100e4363)
