@@ -1,170 +1,138 @@
 //@version=5
 indicator('EMA Touches with Trend Detection and Monthly Counter', overlay=true)
-
 // Input parameters
 bars = input(20, title='Minimum Bars between alerts')
 threshold = input(0.01, title='Touch Threshold (%)') / 100
 source = input.source(close)
-
+volSmoothLen = input(2, "Volume Smoothing Length")
 // Calculate EMAs
 ema12 = ta.ema(source, 12)
 ema26 = ta.ema(source, 26)
 ema50 = ta.ema(source, 50)
-
 // Check conditions for each touch scenario
 touchEMA12 = (high >= ema12 * (1 - threshold) and low <= ema12 * (1 + threshold))
 touchEMA26 = (high >= ema26 * (1 - threshold) and low <= ema26 * (1 + threshold))
 touchEMA50 = (high >= ema50 * (1 - threshold) and low <= ema50 * (1 + threshold))
-
 // Monthly touch counters for each EMA
 var int touchCountEMA12 = 0
 var int touchCountEMA26 = 0
 var int touchCountEMA50 = 0
-
 // Reset counters at the start of a new month
 if ta.change(time("M"))
     touchCountEMA12 := 0
     touchCountEMA26 := 0
     touchCountEMA50 := 0
-
 // Increment touch counts if touched during current bar
 if touchEMA12
     touchCountEMA12 := touchCountEMA12 + 1
-
 if touchEMA26
     touchCountEMA26 := touchCountEMA26 + 1
-
 if touchEMA50
     touchCountEMA50 := touchCountEMA50 + 1
-
 // Detect crossover and crossunder signals with EMA 50
-crossoverSignal = ta.crossover(ema12, ema50)
-crossunderSignal = ta.crossunder(ema12, ema50)
-
+crossoverSignal = ta.crossover(ema12, ema50) 
+crossunderSignal = ta.crossunder(ema12, ema26)
+//crossunderSignal = 0
 // Track if a crossover or crossunder has occurred with EMA 50
 var bool mainCrossOccurred = false
-
 if crossoverSignal or crossunderSignal
     mainCrossOccurred := true // Set to true on first occurrence of crossover/under with EMA 50
-
 // New conditions for crossover/under without touching MA50 after main crossover/under has occurred only EMA 12 & EMA 26 cross
-crossoverSignalNoMACross = ta.crossover(ema12, ema26) and mainCrossOccurred and not ta.crossover(ema12, ema50[1]) and not ta.crossover(ema26, ema50[1])
-crossunderSignalNoMACross = ta.crossunder(ema12, ema26) and mainCrossOccurred and not ta.crossunder(ema12, ema50[1]) and not ta.crossunder(ema26, ema50[1])
-
+crossoverSignalNoMACross = ta.crossover(ema12, ema26)  and not ta.crossover(ema12, ema50) and not ta.crossover(ema26, ema50)
+crossunderSignalNoMACross = ta.crossunder(ema12, ema26)  and not ta.crossunder(ema12, ema50) and not ta.crossunder(ema26, ema50)
+// Volume analysis
+volSMA = ta.sma(volume, volSmoothLen)
+isVolHigh = volume > volSMA
 // Identify bearish candle during pullback
 bearishCandle = close < open
-
-
 bullCandle = close > open
-
 // Track if the previous candle was bearish
 var bool lastBearishCandle = false
-
 var bool lastBullCandle = false
-
 // Conditions for first bearish pullback without touching EMA12
 firstBearishPullbackNoTouchEMA12 = bearishCandle and not touchEMA12 
 firstBearishPullbackTouchEMA12 = bearishCandle and touchEMA12 
 firstBearishPullbackTouchEMA1226 = bearishCandle and touchEMA12 and touchEMA26 
-
 firstBullPullbackNoTouchEMA12 = bullCandle and not touchEMA12 
 firstBullPullbackTouchEMA12 = bullCandle and touchEMA12 
 firstBullPullbackTouchEMA1226 = bullCandle and touchEMA12 and touchEMA26 
-
 // Update lastBearishCandle status
 lastBearishCandle := bearishCandle
-
 // Update lastBearishCandle status
 lastBullCandle := bullCandle
-
 // Trend detection using SMA
 trendLength = input(14, title="Trend Length")
 smaTrend = ta.sma(close, trendLength)
 isUptrend = close > smaTrend and not touchEMA26 and not touchEMA50 
 isDowntrend = close < smaTrend and not touchEMA26 and not touchEMA50 
-
+isUptrend1 = close > smaTrend 
+isDowntrend1 = close < smaTrend 
 // Plot EMAs
 plot(ema12, color=color.blue, title="EMA 12", linewidth=2)
 plot(ema26, color=color.orange, title="EMA 26", linewidth=2)
 plot(ema50, color=color.purple, title="EMA 50", linewidth=2)
-
 // Plot cross signs for crossover and crossunder events only in trending markets
 plotshape(crossoverSignal and isUptrend, style=shape.xcross, color=color.green, size=size.small,
           title="Change Trend Buy", location=location.abovebar)
 plotshape(crossunderSignal and isDowntrend, style=shape.xcross, color=color.red, size=size.small,
           title="Change Trend Sell", location=location.belowbar)
-
 // Plot shapes for no MA crossover signals only after main crosses have occurred.
-plotshape(mainCrossOccurred and crossoverSignalNoMACross , style=shape.triangledown, color=color.red, size=size.small,
-          title="Entry Reversal Sell If Trend Sell & IF MA Cross Appear SL", location=location.abovebar)
-
-plotshape(mainCrossOccurred and crossunderSignalNoMACross , style=shape.triangleup, color=color.green, size=size.small,
-          title="Entry Reversal Buy If Trend Buy & IF MA Cross Appear SL", location=location.belowbar)
-
+// plotshape( crossoverSignalNoMACross  , style=shape.triangledown, color=color.red, size=size.small,
+//           title="Entry Reversal Sell If Trend Sell & IF MA Cross Appear SL", location=location.abovebar)
+// plotshape( crossunderSignalNoMACross and isDowntrend, style=shape.triangleup, color=color.green, size=size.small,
+//           title="Entry Reversal Buy If Trend Buy & IF MA Cross Appear SL", location=location.belowbar)
 // Track if the first occurrence of combined pullback condition has been triggered.
 var bool firstOccurrenceTriggered = false
-
 combinedTouchCondition = (touchEMA12 and not touchEMA26 and not touchEMA50 and isUptrend) 
-                         
-
 combinedTouchNoCondition = (not touchEMA12 and not touchEMA26 and not touchEMA50 and isUptrend) 
-                       
 combinedTouchConditionDownTrend = (touchEMA12 and not touchEMA26 and not touchEMA50 and isDowntrend)
-
 combinedTouchNoConditionDownTrend = (not touchEMA12 and not touchEMA26 and not touchEMA50 and isDowntrend)                       
-
 combinedTouchConditionEMA26 = (touchEMA12 and touchEMA26 and not touchEMA50) // Removed trend condition here for clarity
-
 combinedPullbackCondition = firstBearishPullbackTouchEMA12 and isUptrend
 combinedPullbackNoCondition = firstBearishPullbackNoTouchEMA12 and isUptrend
-
-combinedPullbackConditionDownTrend = firstBullPullbackTouchEMA12 and isDowntrend
+//combinedTouchCondition = (touchEMA12 and not touchEMA26 and not touchEMA50 and isUptrend) 
+combinedPullbackConditionDownTrend = firstBearishPullbackTouchEMA12 and isDowntrend
 combinedPullbackNoConditionDownTrend = firstBullPullbackNoTouchEMA12 and isDowntrend
-
-
+// Detect two consecutive bearish bars with high volume
+//twoRedBarsHighVol = bearishCandle and bearishCandle[1] and isVolHigh and isVolHigh[1] 
+threeRedBarsHighVol = (bearishCandle and bearishCandle[1] and bearishCandle[2]) or (bearishCandle and bearishCandle[1] and bullCandle[2] ) 
+threeGreenBarsHighVol = (bullCandle and bullCandle[1] and bullCandle[2]) 
+// Detect one bearish bar followed by one bullish bar with high volume
+bullishReversal = bearishCandle[1] and bearishCandle[2]  and bullCandle 
+ // Plot signals
+plotshape( series= bullishReversal ,  title="Entry IF UPTREND",  style=shape.circle, location=location.belowbar, color=color.green,  size=size.small)
+// Plot signals
+plotshape( series=  threeRedBarsHighVol  ,  title=" Entry IF DOWNTREND",  style=shape.circle, location=location.belowbar, color=color.red,  size=size.small)
 combinedPullbackConditionEMA26 = firstBearishPullbackTouchEMA1226 // Removed trend condition here for clarity
-
 // Check combined pullback condition only if it hasn't been triggered before.
 if combinedPullbackCondition or combinedPullbackConditionEMA26 
     firstOccurrenceTriggered := true // Triggered if either condition is met
-
 // Plot combined pullback condition only if it's the first occurrence.
-plotshape(combinedPullbackNoCondition and combinedTouchNoCondition , style=shape.cross, color=color.yellow,
+plotshape(combinedPullbackNoCondition and combinedTouchNoCondition , style=shape.cross, color=color.green,
           size=size.small, title="UpTrend Entry After No Touch Blue Line", location=location.belowbar)
-
-plotshape(combinedPullbackCondition and combinedTouchCondition , style=shape.cross, color=color.orange,
+plotshape(combinedPullbackCondition and combinedTouchCondition , style=shape.cross, color=color.green,
           size=size.small, title="UpTrend Entry After Touch Blue Line", location=location.belowbar)
-
 combinedPullbackConditionEMA26DownTrend = firstBullPullbackTouchEMA1226 // Removed trend condition here for clarity
-
 if combinedPullbackConditionDownTrend or combinedPullbackConditionEMA26DownTrend 
     firstOccurrenceTriggered := true // Triggered if either condition is met
-
 // Plot combined pullback condition only if it's the first occurrence.
-plotshape(combinedPullbackNoConditionDownTrend and combinedTouchNoConditionDownTrend , style=shape.cross, color=color.maroon,
+plotshape(combinedPullbackNoConditionDownTrend and combinedTouchNoConditionDownTrend , style=shape.cross, color=color.red,
           size=size.small, title="DownTrend Entry After No Touch Blue Line", location=location.belowbar)
-
 plotshape(combinedPullbackConditionDownTrend and combinedTouchConditionDownTrend , style=shape.cross, color=color.red,
           size=size.small, title="DownTrend Entry After Touch Blue Line", location=location.belowbar)
-
-
 plotshape(combinedPullbackConditionEMA26 , style=shape.cross, color=color.white,
           size=size.small, title="Entry After Touch Orange Line", location=location.belowbar)
-
 // Display monthly touch counts on the chart above the bars at the end of each month.
 var label monthlyLabel12 = na // Initialize label for EMA 12.
 var label monthlyLabel26 = na // Initialize label for EMA 26.
 var label monthlyLabel50 = na // Initialize label for EMA 50.
-
-if bar_index == ta.highest(bar_index, 1) // Only update labels on the last bar of the month.
-    label.delete(monthlyLabel12) // Delete previous label if it exists.
-    label.delete(monthlyLabel26) // Delete previous label if it exists.
-    label.delete(monthlyLabel50) // Delete previous label if it exists.
-    
-    monthlyLabel12 := label.new(bar_index, high + 3 * syminfo.mintick, "Touches EMA 12: " + str.tostring(touchCountEMA12), color=color.blue, style=label.style_label_right)
-    monthlyLabel26 := label.new(bar_index, high + 4 * syminfo.mintick, "Touches EMA 26: " + str.tostring(touchCountEMA26), color=color.orange, style=label.style_label_down)
-    monthlyLabel50 := label.new(bar_index, high + 5 * syminfo.mintick, "Touches EMA 50: " + str.tostring(touchCountEMA50), color=color.purple, style=label.style_label_left)
-
+// if bar_index == ta.highest(bar_index, 1) // Only update labels on the last bar of the month.
+//     label.delete(monthlyLabel12) // Delete previous label if it exists.
+//     label.delete(monthlyLabel26) // Delete previous label if it exists.
+//     label.delete(monthlyLabel50) // Delete previous label if it exists.
+//     monthlyLabel12 := label.new(bar_index, high + 3 * syminfo.mintick, "Touches EMA 12: " + str.tostring(touchCountEMA12), color=color.blue, style=label.style_label_right)
+//     monthlyLabel26 := label.new(bar_index, high + 4 * syminfo.mintick, "Touches EMA 26: " + str.tostring(touchCountEMA26), color=color.orange, style=label.style_label_down)
+//     monthlyLabel50 := label.new(bar_index, high + 5 * syminfo.mintick, "Touches EMA 50: " + str.tostring(touchCountEMA50), color=color.purple, style=label.style_label_left)
 // Alert conditions for touching EMAs and first bearish pullbacks.
 alertcondition(touchEMA12 and  isUptrend , title='Touch EMA 12 Alert', message="Price touched EMA 12 in uptrend!")
 alertcondition(firstBearishPullbackNoTouchEMA12 and isDowntrend , title='First Bearish Pullback Alert', message="First bearish candle during pullback without touching EMA 12 in downtrend!")
