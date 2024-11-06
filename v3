@@ -1,0 +1,29 @@
+//@version=5
+indicator('EMA Touches with Trend Detection', overlay=true)
+
+// Input parameters
+source = input.source(close)
+
+// Calculate EMAs
+ema12 = ta.ema(source, 12)
+ema26 = ta.ema(source, 26)
+ema50 = ta.ema(source, 50)
+
+// Detect crossover and crossunder signals with EMA 12 and EMA 26
+crossoverSignal = ta.crossover(ema12, ema26) 
+crossunderSignal = ta.crossunder(ema12, ema26) 
+
+// Trend detection using SMA (optional)
+trendLength = input(14, title="Trend Length")
+smaTrend = ta.sma(close, trendLength)
+isUptrend = close > smaTrend
+isDowntrend = close < smaTrend
+
+// Plot EMAs
+plot(ema12, color=color.blue, title="EMA 12", linewidth=2)
+plot(ema26, color=color.orange, title="EMA 26", linewidth=2)
+plot(ema50, color=color.purple, title="EMA 50", linewidth=2)
+
+// Plot cross signs for crossover and crossunder events only in trending markets
+plotshape(crossoverSignal and isUptrend, style=shape.xcross, color=color.green, size=size.small, title="Change Trend Buy", location=location.abovebar)
+plotshape(crossunderSignal and isDowntrend, style=shape.xcross, color=color.red, size=size.small, title="Change Trend Sell", location=location.belowbar)
