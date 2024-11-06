@@ -19,3 +19,6 @@ Scenario
    Dont hold and close when go up.
    
 ![Screenshot 2024-10-30 150107](https://github.com/user-attachments/assets/0cb640e7-2a28-4df3-ad0b-1007100e4363)
+
+
+![image](https://github.com/user-attachments/assets/5c88fee0-2f16-4891-af73-68f61cae7b18)
