@@ -62,26 +62,34 @@ plotshape(isSignificantMoveDown, style=shape.circle, color=color.red, size=size.
 if (crossoverSignal or crossunderSignal)
     entryPrice := close // Update to the new crossover/crossunder price
 
-// Monthly counting logic
+// Monthly counting logic with a flag to show labels only once per month
 var int monthCounter = na
+var bool previousMonthDisplayed = false // Flag to track if previous month's labels were displayed
 
 if (na(monthCounter) or month(time) != monthCounter)
     // Move current counts to last counts at the start of a new month
     upCountLast := upCountCurrent
     downCountLast := downCountCurrent
     
-    // Reset current counts for the new month to start counting fresh.
+    // Reset current counts for the new month
     upCountCurrent := 0
     downCountCurrent := 0
     
     monthCounter := month(time) // Update to current month
+    
+    // Check if last month's labels were displayed to control current month's display
+    previousMonthDisplayed := false // Reset this flag for checking
+
+// Check if last month's labels were displayed; if so, do not display current month's labels.
+if (month(time[1]) != month(time[2])) // Check if we are on a new bar of a new month.
+    previousMonthDisplayed := true 
 
 labelTextCurrent = "Current Month:\n" + str.tostring(upCountCurrent) + " Up\n" + str.tostring(downCountCurrent) + " Down"
 labelTextLast = "Last Month:\n" + str.tostring(upCountLast) + " Up\n" + str.tostring(downCountLast) + " Down"
 
-// Plot labels at the last bar of the current month with counts of significant movements.
-if (month(time) != month(time[1])) // Check if we are at the last bar of a month
-    label.new(bar_index[1], high[1] * 1.02, labelTextLast, style=label.style_label_down, color=color.new(color.white, 0), textcolor=color.black) // Last Month label above high
-    
-    // Display current month's counts below last month's label.
-    label.new(bar_index[1], high[1] * 0.98, labelTextCurrent, style=label.style_label_down, color=color.new(color.green, 0), textcolor=color.white) // Current Month label below high
+// Plot labels at the last bar of the current month with counts of significant movements only once per month.
+if (month(time) != month(time[1]) and not previousMonthDisplayed)
+    label.new(bar_index[1], high[1], labelTextLast, style=label.style_label_down, color=color.new(color.white, 0), textcolor=color.black)
+
+if (month(time) != month(time[1]) and previousMonthDisplayed)
+    label.new(bar_index[1], high[1] * 1.02, labelTextCurrent, style=label.style_label_down, color=color.new(color.green, 0), textcolor=color.white)
