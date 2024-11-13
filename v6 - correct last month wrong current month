@@ -1,0 +1,87 @@
+//@version=5
+indicator('EMA Touches with Trend Detection and 40 Tick Movement', overlay=true)
+
+// Input parameters
+source = input.source(close)
+
+// Calculate EMAs
+ema12 = ta.ema(source, 12)
+ema26 = ta.ema(source, 26)
+ema50 = ta.ema(source, 40)
+
+// Detect crossover and crossunder signals with EMA 12 and EMA 50
+crossoverSignal = ta.crossover(ema12, ema50) 
+crossunderSignal = ta.crossunder(ema12, ema50) 
+
+// Store the price at the crossover or crossunder event
+var float entryPrice = na
+var bool hasSignificantMoveUp = false
+var bool hasSignificantMoveDown = false
+
+// Initialize counters for significant movements
+var int upCountCurrent = 0
+var int downCountCurrent = 0
+var int upCountLast = 0
+var int downCountLast = 0
+
+if (crossoverSignal or crossunderSignal)
+    entryPrice := close  // Store the price at crossover or crossunder
+    hasSignificantMoveUp := false // Reset for new crossover/crossunder
+    hasSignificantMoveDown := false // Reset for new crossover/crossunder
+
+// Calculate price movement from entry price
+priceMovement = close - entryPrice
+
+// Check for significant movement of 40 ticks after crossover/crossunder
+isSignificantMoveUp = (priceMovement >= 40) and not na(entryPrice) and not hasSignificantMoveUp
+isSignificantMoveDown = (priceMovement <= -40) and not na(entryPrice) and not hasSignificantMoveDown
+
+// Update flags if significant movements are detected
+if (isSignificantMoveUp)
+    hasSignificantMoveUp := true
+    upCountCurrent += 1 // Increment current month up count
+
+if (isSignificantMoveDown)
+    hasSignificantMoveDown := true
+    downCountCurrent += 1 // Increment current month down count
+
+// Plot EMAs
+plot(ema12, color=color.blue, title="EMA 12", linewidth=2)
+plot(ema26, color=color.orange, title="EMA 26", linewidth=2)
+plot(ema50, color=color.purple, title="EMA 50", linewidth=2)
+
+// Plot cross signs for crossover and crossunder events
+plotshape(crossoverSignal, style=shape.xcross, color=color.green, size=size.small, title="Crossover", location=location.abovebar)
+plotshape(crossunderSignal, style=shape.xcross, color=color.red, size=size.small, title="Crossunder", location=location.belowbar)
+
+// Plot circles for significant movements after crossover/crossunder only once
+plotshape(isSignificantMoveUp, style=shape.circle, color=color.green, size=size.small, title="40+ Up", location=location.abovebar)
+plotshape(isSignificantMoveDown, style=shape.circle, color=color.red, size=size.small, title="40+ Down", location=location.belowbar)
+
+// Reset entryPrice when a new crossover/crossunder occurs
+if (crossoverSignal or crossunderSignal)
+    entryPrice := close // Update to the new crossover/crossunder price
+
+// Monthly counting logic
+var int monthCounter = na
+
+if (na(monthCounter) or month(time) != monthCounter)
+    // Move current counts to last counts at the start of a new month
+    upCountLast := upCountCurrent
+    downCountLast := downCountCurrent
+    
+    // Reset current counts for the new month to start counting fresh.
+    upCountCurrent := 0
+    downCountCurrent := 0
+    
+    monthCounter := month(time) // Update to current month
+
+labelTextCurrent = "Current Month:\n" + str.tostring(upCountCurrent) + " Up\n" + str.tostring(downCountCurrent) + " Down"
+labelTextLast = "Last Month:\n" + str.tostring(upCountLast) + " Up\n" + str.tostring(downCountLast) + " Down"
+
+// Plot labels at the last bar of the current month with counts of significant movements.
+if (month(time) != month(time[1])) // Check if we are at the last bar of a month
+    label.new(bar_index[1], high[1] * 1.02, labelTextLast, style=label.style_label_down, color=color.new(color.white, 0), textcolor=color.black) // Last Month label above high
+    
+    // Display current month's counts below last month's label.
+    label.new(bar_index[1], high[1] * 0.98, labelTextCurrent, style=label.style_label_down, color=color.new(color.green, 0), textcolor=color.white) // Current Month label below high
