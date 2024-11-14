@@ -14,6 +14,7 @@ crossoverSignal = ta.crossover(ema12, ema50)
 crossunderSignal = ta.crossunder(ema12, ema50) 
 
 // Store the price at the crossover or crossunder event
+// Store the price at the crossover or crossunder event
 var float entryPrice = na
 var bool hasSignificantMoveUp = false
 var bool hasSignificantMoveDown = false
@@ -23,8 +24,8 @@ if (crossoverSignal or crossunderSignal)
     hasSignificantMoveUp := false // Reset for new crossover/crossunder
     hasSignificantMoveDown := false // Reset for new crossover/crossunder
 
-// Calculate price movement from entry price
-priceMovement = close - entryPrice
+// Calculate price movement from entry price only if in trade
+priceMovement =  close - entryPrice 
 
 // Check for significant movement of 30 ticks after crossover/crossunder
 isSignificantMoveUp = (priceMovement >= 30) and not na(entryPrice) and not hasSignificantMoveUp
@@ -47,5 +48,10 @@ plotshape(crossoverSignal, style=shape.xcross, color=color.green, size=size.smal
 plotshape(crossunderSignal, style=shape.xcross, color=color.red, size=size.small, title="Crossunder", location=location.belowbar)
 
 // Plot circles for significant movements after crossover/crossunder using plot()
+// Plot circles for significant movements after crossover/crossunder using plot()
 plot(isSignificantMoveUp ? close : na, color=color.green, style=plot.style_circles, linewidth=10, title="Significant Move Up")
 plot(isSignificantMoveDown ? close : na, color=color.red, style=plot.style_circles, linewidth=10, title="Significant Move Down")
+
+// Reset entryPrice when a new crossover/crossunder occurs
+if (crossoverSignal or crossunderSignal)
+    entryPrice := close // Update to the new crossover/crossunder price
