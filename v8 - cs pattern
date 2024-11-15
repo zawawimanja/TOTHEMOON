@@ -11,10 +11,12 @@ bearishEngulfing = close[1] > open[1] and close < open and close <= open[1] and 
 hammer = (high - low) > 3 * (open - close) and (close - low) / (0.001 + high - low) > 0.6 and (open - low) / (0.001 + high - low) > 0.6
 
 // Function to detect Inverse Hammer
-inverseHammer = (high - low) > 3 * (open - close) and (high - close) / (0.001 + high - low) > 0.6 and (high - open) / (0.001 + high - low) > 0.6
+inverseHammer = (high - low) > 3 * (open - close) and 
+                 (high - close) >= 2 * math.abs(open - close) and 
+                 (close - low) <= 0.01 * math.abs(open - close)
 
 // Function to detect Shooting Star
-shootingStar = (high - low) > 3 * (open - close) and (high - close) / (0.001 + high - low) > 0.6 and (high - open) / (0.001 + high - low) > 0.6
+shootingStar = (high - low) > 3 * (open - close) and (high - close) >= 2 * math.abs(open - close) and (close - low) <= 0.01 * math.abs(open - close)
 
 // Function to detect Morning Star
 morningStar = close[2] < open[2] and close[1] < open[1] and close > open and close > open[2]
@@ -35,7 +37,10 @@ threeWhiteSoldiers = close > open and close[1] > open[1] and close[2] > open[2]
 threeBlackCrows = close < open and close[1] < open[1] and close[2] < open[2]
 
 // Function to detect Hanging Man
-hangingMan = ((high - max(open, close)) >= 2 * abs(open - close)) and ((min(open, close) - low) <= 0.01 * abs(open - close))
+hangingMan = ((high - math.max(open, close)) >= 2 * math.abs(open - close)) and ((math.min(open, close) - low) <= 0.01 * math.abs(open - close))
+
+// Function to detect Doji
+doji = math.abs(close - open) <= 0.01 * (high - low)
 
 // Variable to track if a label has been created for the current bar
 var bool labelCreated = false
@@ -71,25 +76,30 @@ if bar_index != bar_index[1]
 
     // Check for sell signals in order of priority
     if bearishEngulfing and not labelCreated
-        label.new(bar_index, high, "Bearish Engulfing", style=label.style_label_down, color=color.red, textcolor=color.white, size=size.small)
+        label.new(bar_index, high, "Bearish Engulfing", style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
         labelCreated := true
 
     if shootingStar and not labelCreated
-        label.new(bar_index, high, "Shooting Star", style=label.style_label_down, color=color.red, textcolor=color.white, size=size.small)
+        label.new(bar_index , high , "Shooting Star" , style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
         labelCreated := true
 
     if eveningStar and not labelCreated
-        label.new(bar_index, high, "Evening Star", style=label.style_label_down, color=color.red, textcolor=color.white, size=size.small)
+        label.new(bar_index , high , "Evening Star" , style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
         labelCreated := true
 
     if darkCloudCover and not labelCreated
-        label.new(bar_index, high, "Dark Cloud Cover", style=label.style_label_down, color=color.red, textcolor=color.white, size=size.small)
+        label.new(bar_index , high , "Dark Cloud Cover" , style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
         labelCreated := true
 
-    if threeBlackCrows and not labelCreated
-        label.new(bar_index, high, "Three Black Crows", style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
-        labelCreated := true
+    if threeBlackCrows and not labelCreated 
+        label.new(bar_index , high , "Three Black Crows" , style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
+        labelCreated := true 
         
+    // Check for Hanging Man last due to its specific context after an uptrend 
     if hangingMan and not labelCreated 
         label.new(bar_index , high , "Hanging Man" , style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
         labelCreated := true 
+
+    // Check for Doji last in the order of priority 
+    if doji and not labelCreated 
+        label.new(bar_index , high , "Doji" , style=label.style_label_down , color=color.gray , textcolor=color.white , size=size.small)
