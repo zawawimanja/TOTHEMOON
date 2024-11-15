@@ -1,0 +1,95 @@
+//@version=5
+indicator("Candlestick Pattern Detector (Closed Candles)", overlay=true)
+
+// Function to detect Bullish Engulfing
+bullishEngulfing = close[1] < open[1] and close > open and close >= open[1] and open <= close[1]
+
+// Function to detect Bearish Engulfing
+bearishEngulfing = close[1] > open[1] and close < open and close <= open[1] and open >= close[1]
+
+// Function to detect Hammer
+hammer = (high - low) > 3 * (open - close) and (close - low) / (0.001 + high - low) > 0.6 and (open - low) / (0.001 + high - low) > 0.6
+
+// Function to detect Inverse Hammer
+inverseHammer = (high - low) > 3 * (open - close) and (high - close) / (0.001 + high - low) > 0.6 and (high - open) / (0.001 + high - low) > 0.6
+
+// Function to detect Shooting Star
+shootingStar = (high - low) > 3 * (open - close) and (high - close) / (0.001 + high - low) > 0.6 and (high - open) / (0.001 + high - low) > 0.6
+
+// Function to detect Morning Star
+morningStar = close[2] < open[2] and close[1] < open[1] and close > open and close > open[2]
+
+// Function to detect Evening Star
+eveningStar = close[2] > open[2] and close[1] > open[1] and close < open and close < open[2]
+
+// Function to detect Piercing Line
+piercingLine = close[1] < open[1] and open < close[1] and close > (open[1] + close[1]) / 2
+
+// Function to detect Dark Cloud Cover
+darkCloudCover = close[1] > open[1] and open > close[1] and close < (open[1] + close[1]) / 2
+
+// Function to detect Three White Soldiers
+threeWhiteSoldiers = close > open and close[1] > open[1] and close[2] > open[2]
+
+// Function to detect Three Black Crows
+threeBlackCrows = close < open and close[1] < open[1] and close[2] < open[2]
+
+// Function to detect Hanging Man
+hangingMan = ((high - max(open, close)) >= 2 * abs(open - close)) and ((min(open, close) - low) <= 0.01 * abs(open - close))
+
+// Variable to track if a label has been created for the current bar
+var bool labelCreated = false
+
+// Only evaluate patterns on the closed candle
+if bar_index != bar_index[1]
+    labelCreated := false // Reset for new candle
+
+    // Check for patterns in order of priority
+    if bullishEngulfing and not labelCreated
+        label.new(bar_index, high, "Bullish Engulfing", style=label.style_label_up, color=color.green, textcolor=color.white, size=size.small)
+        labelCreated := true
+
+    if hammer and not labelCreated
+        label.new(bar_index, low, "Hammer", style=label.style_label_up, color=color.green, textcolor=color.white, size=size.small)
+        labelCreated := true
+
+    if inverseHammer and not labelCreated
+        label.new(bar_index, high, "Inverse Hammer", style=label.style_label_up, color=color.green, textcolor=color.white, size=size.small)
+        labelCreated := true
+
+    if morningStar and not labelCreated
+        label.new(bar_index, low, "Morning Star", style=label.style_label_up, color=color.green, textcolor=color.white, size=size.small)
+        labelCreated := true
+
+    if piercingLine and not labelCreated
+        label.new(bar_index, low, "Piercing Line", style=label.style_label_up, color=color.green, textcolor=color.white, size=size.small)
+        labelCreated := true
+
+    if threeWhiteSoldiers and not labelCreated
+        label.new(bar_index, low, "Three White Soldiers", style=label.style_label_up, color=color.green, textcolor=color.white, size=size.small)
+        labelCreated := true
+
+    // Check for sell signals in order of priority
+    if bearishEngulfing and not labelCreated
+        label.new(bar_index, high, "Bearish Engulfing", style=label.style_label_down, color=color.red, textcolor=color.white, size=size.small)
+        labelCreated := true
+
+    if shootingStar and not labelCreated
+        label.new(bar_index, high, "Shooting Star", style=label.style_label_down, color=color.red, textcolor=color.white, size=size.small)
+        labelCreated := true
+
+    if eveningStar and not labelCreated
+        label.new(bar_index, high, "Evening Star", style=label.style_label_down, color=color.red, textcolor=color.white, size=size.small)
+        labelCreated := true
+
+    if darkCloudCover and not labelCreated
+        label.new(bar_index, high, "Dark Cloud Cover", style=label.style_label_down, color=color.red, textcolor=color.white, size=size.small)
+        labelCreated := true
+
+    if threeBlackCrows and not labelCreated
+        label.new(bar_index, high, "Three Black Crows", style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
+        labelCreated := true
+        
+    if hangingMan and not labelCreated 
+        label.new(bar_index , high , "Hanging Man" , style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
+        labelCreated := true 
