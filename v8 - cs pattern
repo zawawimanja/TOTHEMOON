@@ -8,7 +8,9 @@ bullishEngulfing = close[1] < open[1] and close > open and close >= open[1] and 
 bearishEngulfing = close[1] > open[1] and close < open and close <= open[1] and open >= close[1]
 
 // Function to detect Hammer
-hammer = (high - low) > 3 * (open - close) and (close - low) / (0.001 + high - low) > 0.6 and (open - low) / (0.001 + high - low) > 0.6
+hammer = (high - low) > 3 * (open - close) and 
+         (close - low) / (0.001 + high - low) > 0.6 and 
+         (open - low) / (0.001 + high - low) > 0.6
 
 // Function to detect Inverse Hammer
 inverseHammer = (high - low) > 3 * (open - close) and 
@@ -16,7 +18,7 @@ inverseHammer = (high - low) > 3 * (open - close) and
                  (close - low) <= 0.01 * math.abs(open - close)
 
 // Function to detect Shooting Star
-shootingStar = (high - low) > 3 * (open - close) and (high - close) >= 2 * math.abs(open - close) and (close - low) <= 0.01 * math.abs(open - close)
+shootingStar = (high - low) > 3 * (open - close) and  (high - close) >= 2 * math.abs(open - close) and  (close - low) <= 0.01 * math.abs(open - close)
 
 // Function to detect Morning Star
 morningStar = close[2] < open[2] and close[1] < open[1] and close > open and close > open[2]
@@ -51,7 +53,7 @@ if bar_index != bar_index[1]
 
     // Check for patterns in order of priority
     if bullishEngulfing and not labelCreated
-        label.new(bar_index, high, "Bullish Engulfing", style=label.style_label_up, color=color.green, textcolor=color.white, size=size.small)
+        label.new(bar_index, high, "Bullish\nEngulfing", style=label.style_label_up, color=color.green, textcolor=color.white, size=size.small)
         labelCreated := true
 
     if hammer and not labelCreated
@@ -59,45 +61,45 @@ if bar_index != bar_index[1]
         labelCreated := true
 
     if inverseHammer and not labelCreated
-        label.new(bar_index, high, "Inverse Hammer", style=label.style_label_up, color=color.green, textcolor=color.white, size=size.small)
+        label.new(bar_index, high, "Inverse\nHammer", style=label.style_label_up, color=color.green, textcolor=color.white, size=size.small)
         labelCreated := true
 
     if morningStar and not labelCreated
-        label.new(bar_index, low, "Morning Star", style=label.style_label_up, color=color.green, textcolor=color.white, size=size.small)
+        label.new(bar_index, low, "Morning\nStar", style=label.style_label_up, color=color.green, textcolor=color.white, size=size.small)
         labelCreated := true
 
     if piercingLine and not labelCreated
-        label.new(bar_index, low, "Piercing Line", style=label.style_label_up, color=color.green, textcolor=color.white, size=size.small)
+        label.new(bar_index, low, "Piercing\nLine", style=label.style_label_up, color=color.green, textcolor=color.white, size=size.small)
         labelCreated := true
 
     if threeWhiteSoldiers and not labelCreated
-        label.new(bar_index, low, "Three White Soldiers", style=label.style_label_up, color=color.green, textcolor=color.white, size=size.small)
+        label.new(bar_index, low, "Three\nWhite\nSoldiers", style=label.style_label_up, color=color.green, textcolor=color.white, size=size.small)
         labelCreated := true
 
     // Check for sell signals in order of priority
     if bearishEngulfing and not labelCreated
-        label.new(bar_index, high, "Bearish Engulfing", style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
+        label.new(bar_index, high, "Bearish\nEngulfing", style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
         labelCreated := true
 
     if shootingStar and not labelCreated
-        label.new(bar_index , high , "Shooting Star" , style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
+        label.new(bar_index , high , "Shooting\nStar" , style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
         labelCreated := true
 
     if eveningStar and not labelCreated
-        label.new(bar_index , high , "Evening Star" , style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
+        label.new(bar_index , high , "Evening\nStar" , style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
         labelCreated := true
 
     if darkCloudCover and not labelCreated
-        label.new(bar_index , high , "Dark Cloud Cover" , style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
+        label.new(bar_index , high , "Dark\nCloud\nCover" , style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
         labelCreated := true
 
     if threeBlackCrows and not labelCreated 
-        label.new(bar_index , high , "Three Black Crows" , style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
+        label.new(bar_index , high , "Three\nBlack\nCrows" , style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
         labelCreated := true 
         
     // Check for Hanging Man last due to its specific context after an uptrend 
     if hangingMan and not labelCreated 
-        label.new(bar_index , high , "Hanging Man" , style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
+        label.new(bar_index , high , "Hanging\nMan" , style=label.style_label_down , color=color.red , textcolor=color.white , size=size.small)
         labelCreated := true 
 
     // Check for Doji last in the order of priority 
