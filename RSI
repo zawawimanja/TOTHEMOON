@@ -1,9 +1,8 @@
 //@version=5
-indicator(title="Relative Strength Index", shorttitle="RSI", format=format.price, precision=2, timeframe="", timeframe_gaps=true)
+indicator(title="RSI For TF5M", shorttitle="RSI", format=format.price, precision=2, timeframe="", timeframe_gaps=true)
 
-rsiLengthInput = input.int(14, minval=1, title="RSI Length", group="RSI Settings")
+rsiLengthInput = input.int(3, minval=1, title="RSI Length", group="RSI Settings")
 rsiSourceInput = input.source(close, "Source", group="RSI Settings")
-calculateDivergence = input.bool(false, title="Calculate Divergence", group="RSI Settings", display = display.data_window, tooltip = "Calculating divergences is needed in order for divergence alerts to fire.")
 
 change = ta.change(rsiSourceInput)
 up = ta.rma(math.max(change, 0), rsiLengthInput)
@@ -24,9 +23,8 @@ GRP = "Moving Average"
 TT_BB = "Only applies when 'SMA + Bollinger Bands' is selected. Determines the distance between the SMA and the bands."
 maTypeInput = input.string("SMA", "Type", options = ["None", "SMA", "SMA + Bollinger Bands", "EMA", "SMMA (RMA)", "WMA", "VWMA"], group = GRP, display = display.data_window)
 maLengthInput = input.int(14, "Length", group = GRP, display = display.data_window)
-bbMultInput = input.float(2.0, "BB StdDev", minval = 0.001, maxval = 50, step = 0.5, tooltip = TT_BB, group = GRP, display = display.data_window)
+
 var enableMA = maTypeInput != "None"
-var isBB = maTypeInput == "SMA + Bollinger Bands"
 
 // Smoothing MA Calculation
 ma(source, length, MAtype) =>
@@ -42,7 +40,6 @@ ma(source, length, MAtype) =>
 smoothingMA = enableMA ? ma(rsi, maLengthInput, maTypeInput) : na
 plot(smoothingMA, "RSI-based MA", color=color.yellow, display = enableMA ? display.all : display.none)
 
-
 // Alert conditions for RSI overbought and oversold
 overboughtCondition = ta.crossover(rsi, 70)
 oversoldCondition = ta.crossunder(rsi, 30)
@@ -50,11 +47,6 @@ oversoldCondition = ta.crossunder(rsi, 30)
 extremeOverboughtCondition = ta.crossover(rsi, 85)
 extremeOversoldCondition = ta.crossunder(rsi, 15)
 
+alertcondition(overboughtCondition and extremeOverboughtCondition, title='RSI Overbought Alert', message='RSI has crossed above 70 & 85. Consider potential selling opportunities.')
+alertcondition(oversoldCondition and extremeOversoldCondition, title='RSI Oversold Alert', message='RSI has crossed below 30 & 15. Consider potential buying opportunities.')
 
-
-alertcondition(overboughtCondition, title='RSI Overbought Alert', message='RSI has crossed above 70. Consider potential selling opportunities.')
-alertcondition(oversoldCondition, title='RSI Oversold Alert', message='RSI has crossed below 30. Consider potential buying opportunities.')
-
-
-alertcondition(extremeOverboughtCondition, title='RSI Extreme Overbought Alert', message='RSI has crossed 85. Consider potential extreme selling opportunities.')
-alertcondition(extremeOversoldCondition, title='RSI Extreme Oversold Alert', message='RSI has crossed  15. Consider potential extreme buying opportunities.')
